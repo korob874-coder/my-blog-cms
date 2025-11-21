@@ -256,83 +256,93 @@
             color: #aaa;
         }
         
-        /* Admin Panel */
-        .admin-panel {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        
-        .admin-btn {
-            background-color: var(--primary);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .admin-btn:hover {
-            background-color: var(--secondary);
-            transform: scale(1.1);
-        }
-        
-        .admin-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .admin-modal-content {
-            background-color: white;
-            width: 90%;
-            max-width: 800px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .admin-header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .admin-header h2 {
-            font-size: 1.5rem;
-        }
-        
-        .close-admin {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        
-        .admin-body {
-            padding: 1.5rem;
-            max-height: 70vh;
-            overflow-y: auto;
-        }
-        
+       /* Admin Panel - VERSION BARU */
+.admin-panel {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+.admin-btn {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid white;
+}
+
+.admin-btn:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 8px 25px rgba(67, 97, 238, 0.6);
+}
+
+/* Efek floating animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.admin-btn {
+    animation: float 3s ease-in-out infinite;
+}
+
+.admin-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.admin-modal-content {
+    background-color: white;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.admin-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-header h2 {
+    font-size: 1.5rem;
+}
+
+.close-admin {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.admin-body {
+    padding: 1.5rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -587,59 +597,74 @@
         </div>
     </div>
 
-   <script>
-    // 🔥 Konfigurasi Firebase - GANTI dengan konfigurasi Anda!
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+
     const firebaseConfig = {
-  apiKey: "AIzaSyDCfOST0PMhPlzTqFN4ZVZYTamqS8etl7M",
-  authDomain: "my-blog-cms-42021.firebaseapp.com",
-  databaseURL: "https://my-blog-cms-42021-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "my-blog-cms-42021",
-  storageBucket: "my-blog-cms-42021.firebasestorage.app",
-  messagingSenderId: "1036259041840",
-  appId: "1:1036259041840:web:a8d18e2cc8dd335db243f5"
-};
+        apiKey: "AIzaSyDCfOST0PMhPlzTqFN4ZVZYTamqS8etl7M",
+        authDomain: "my-blog-cms-42021.firebaseapp.com",
+        databaseURL: "https://my-blog-cms-42021-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "my-blog-cms-42021",
+        storageBucket: "my-blog-cms-42021.firebasestorage.app",
+        messagingSenderId: "1036259041840",
+        appId: "1:1036259041840:web:a8d18e2cc8dd335db243f5"
+    };
 
     // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
-    // Data default blog
+    // 🔐 ADMIN PASSWORD - GANTI DENGAN PASSWORD ANDA!
+    const ADMIN_PASSWORD = "bagasyuzhong";
+
     let blogData = {
         posts: [],
         categories: []
     };
 
-    // 🔥 Fungsi untuk load data dari Firebase
-    function loadBlogData() {
-        database.ref('blogData').once('value')
-            .then((snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    blogData = data;
-                } else {
-                    // Data default jika pertama kali
-                    blogData = {
-                        posts: [
-                            {
-                                id: 1,
-                                title: "Selamat Datang di Blog Anda!",
-                                content: "Ini adalah postingan pertama Anda. Edit atau hapus postingan ini melalui admin panel, lalu mulai menulis konten Anda sendiri!",
-                                category: "Umum",
-                                tags: ["selamat-datang", "blog"],
-                                date: getCurrentDate(),
-                                excerpt: "Postingan pertama di blog Anda. Mulailah menulis konten menarik!"
-                            }
-                        ],
-                        categories: ["Umum", "Pemrograman", "Teknologi"]
-                    };
-                    saveBlogData(); // Simpan data default
-                }
-                displayAllData();
-            })
-            .catch((error) => {
-                console.error("Error loading data:", error);
-                alert("Error loading data. Check console for details.");
-            });
+    // 🔐 Fungsi check akses admin
+    function checkAdminAccess() {
+        const password = prompt("🔐 Masukkan Password Admin:");
+        if (password === ADMIN_PASSWORD) {
+            document.getElementById('admin-modal').style.display = 'flex';
+        } else {
+            alert("❌ Password salah! Hanya admin yang bisa akses.");
+        }
+    }
+
+    // Load data dari Firebase
+    async function loadBlogData() {
+        console.log("Loading data from Firebase...");
+        try {
+            const snapshot = await get(ref(database, 'blogData'));
+            const data = snapshot.val();
+            
+            if (data) {
+                blogData = data;
+                console.log("Data loaded successfully:", blogData);
+            } else {
+                // Data default jika pertama kali
+                blogData = {
+                    posts: [
+                        {
+                            id: 1,
+                            title: "Selamat Datang di Blog Saya!",
+                            content: "Ini adalah postingan pertama. Silakan login sebagai admin untuk mengelola konten.",
+                            category: "Umum",
+                            tags: ["selamat-datang", "blog"],
+                            date: getCurrentDate(),
+                            excerpt: "Postingan pertama di blog ini."
+                        }
+                    ],
+                    categories: ["Umum", "Pemrograman", "Teknologi"]
+                };
+                await saveBlogData();
+            }
+            displayAllData();
+        } catch (error) {
+            console.error("Error loading data:", error);
+        }
     }
 
     // 🔥 Fungsi untuk save data ke Firebase
@@ -906,30 +931,23 @@
         }
     }
 
-    // Initialize the blog
+     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-        // Load data from Firebase
         loadBlogData();
         
-        // Add event listener for form submission
-        document.getElementById('post-form').addEventListener('submit', addPost);
-        
-        // Admin panel toggle
-        document.getElementById('admin-toggle').addEventListener('click', function() {
-            document.getElementById('admin-modal').style.display = 'flex';
-        });
+        // 🔐 Ganti dengan password check
+        document.getElementById('admin-toggle').addEventListener('click', checkAdminAccess);
         
         document.getElementById('close-admin').addEventListener('click', function() {
             document.getElementById('admin-modal').style.display = 'none';
         });
         
-        // Close admin modal when clicking outside
+        document.getElementById('post-form').addEventListener('submit', addPost);
+        
         window.addEventListener('click', function(event) {
             const adminModal = document.getElementById('admin-modal');
             if (event.target === adminModal) {
                 adminModal.style.display = 'none';
-                
-                // Reset form when closing modal
                 document.getElementById('post-form').reset();
                 const submitBtn = document.querySelector('#post-form button[type="submit"]');
                 submitBtn.innerHTML = '<i class="fas fa-plus"></i> Tambah Postingan';
@@ -937,6 +955,10 @@
             }
         });
     });
+
+    // 🔑 GANTI PASSWORD DEFAULT
+    // Sekarang passwordnya: admin123
+    // Ganti dengan password yang lebih kuat!
 </script>
 </body>
 </html>
