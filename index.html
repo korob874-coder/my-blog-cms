@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Saya - CMS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tambahkan sebelum </head> -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --danger: #e63946;
+            --warning: #fca311;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        nav ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: flex;
+            margin: 2rem 0;
+            gap: 2rem;
+        }
+        
+        .blog-posts {
+            flex: 2;
+        }
+        
+        .sidebar {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Post Styles */
+        .post {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .post:hover {
+            transform: translateY(-5px);
+        }
+        
+        .post-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .post-meta {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .post-meta i {
+            margin-right: 5px;
+        }
+        
+        .post-content {
+            margin-bottom: 1rem;
+        }
+        
+        .read-more {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        
+        .read-more:hover {
+            background-color: var(--secondary);
+        }
+        
+        /* Sidebar Styles */
+        .sidebar-widget {
+            margin-bottom: 2rem;
+        }
+        
+        .sidebar-title {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+            color: var(--dark);
+        }
+        
+        .categories-list, .recent-posts-list {
+            list-style: none;
+        }
+        
+        .categories-list li, .recent-posts-list li {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .categories-list li a, .recent-posts-list li a {
+            color: var(--dark);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .categories-list li a:hover, .recent-posts-list li a:hover {
+            color: var(--primary);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .footer-section {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .footer-section p, .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+        }
+        
+        .footer-section a:hover {
+            color: white;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        /* Admin Panel */
+        .admin-panel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .admin-btn {
+            background-color: var(--primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-btn:hover {
+            background-color: var(--secondary);
+            transform: scale(1.1);
+        }
+        
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .close-admin {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .admin-body {
+            padding: 1.5rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c1121f;
+        }
+        
+        .posts-list {
+            margin-top: 2rem;
+        }
+        
+        .post-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .post-item:last-child {
+            border-bottom: none;
+        }
+        
+        .post-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .edit-btn {
+            color: var(--primary);
+        }
+        
+        .delete-btn {
+            color: var(--danger);
+        }
+        
+        .action-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin-top: 1rem;
+                justify-content: center;
+            }
+            
+            nav ul li {
+                margin: 0 0.5rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-blog"></i>
+                    BlogKu
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-home"></i> Beranda</a></li>
+                        <li><a href="#"><i class="fas fa-folder"></i> Kategori</a></li>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> Tentang</a></li>
+                        <li><a href="#"><i class="fas fa-envelope"></i> Kontak</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="main-content">
+            <!-- Blog Posts -->
+            <section class="blog-posts" id="posts-container">
+                <!-- Posts will be loaded here dynamically -->
+            </section>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-widget">
+                    <h3 class="sidebar-title">Tentang Blog</h3>
+                    <p>Ini adalah blog pribadi saya yang berisi berbagai tulisan tentang teknologi, pemrograman, dan kehidupan sehari-hari.</p>
+                </div>
+                
+                <div class="sidebar-widget">
+                    <h3 class="sidebar-title">Kategori</h3>
+                    <ul class="categories-list" id="categories-container">
+                        <!-- Categories will be loaded here dynamically -->
+                    </ul>
+                </div>
+                
+                <div class="sidebar-widget">
+                    <h3 class="sidebar-title">Postingan Terbaru</h3>
+                    <ul class="recent-posts-list" id="recent-posts-container">
+                        <!-- Recent posts will be loaded here dynamically -->
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Tentang Kami</h3>
+                    <p>Blog pribadi yang berbagi pengetahuan dan pengalaman tentang teknologi dan kehidupan.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Link Cepat</h3>
+                    <p><a href="#">Beranda</a></p>
+                    <p><a href="#">Tentang</a></p>
+                    <p><a href="#">Kontak</a></p>
+                </div>
+                <div class="footer-section">
+                    <h3>Hubungi Kami</h3>
+                    <p><i class="fas fa-envelope"></i> email@example.com</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2023 BlogKu. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel">
+        <div class="admin-btn" id="admin-toggle">
+            <i class="fas fa-cog"></i>
+        </div>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="admin-modal" id="admin-modal">
+        <div class="admin-modal-content">
+            <div class="admin-header">
+                <h2><i class="fas fa-cogs"></i> Admin Panel</h2>
+                <button class="close-admin" id="close-admin"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="admin-body">
+                <h3>Tambah Postingan Baru</h3>
+                <form id="post-form">
+                    <div class="form-group">
+                        <label for="post-title">Judul</label>
+                        <input type="text" id="post-title" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-content">Konten</label>
+                        <textarea id="post-content" class="form-control" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-category">Kategori</label>
+                        <input type="text" id="post-category" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-tags">Tags (pisahkan dengan koma)</label>
+                        <input type="text" id="post-tags" class="form-control">
+                    </div>
+                    <button type="submit" class="btn"><i class="fas fa-plus"></i> Tambah Postingan</button>
+                </form>
+
+                <div class="posts-list">
+                    <h3>Kelola Postingan</h3>
+                    <div id="admin-posts-container">
+                        <!-- Posts for admin will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script>
+    // 🔥 Konfigurasi Firebase - GANTI dengan konfigurasi Anda!
+    const firebaseConfig = {
+  apiKey: "AIzaSyDCfOST0PMhPlzTqFN4ZVZYTamqS8etl7M",
+  authDomain: "my-blog-cms-42021.firebaseapp.com",
+  databaseURL: "https://my-blog-cms-42021-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "my-blog-cms-42021",
+  storageBucket: "my-blog-cms-42021.firebasestorage.app",
+  messagingSenderId: "1036259041840",
+  appId: "1:1036259041840:web:a8d18e2cc8dd335db243f5"
+};
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Data default blog
+    let blogData = {
+        posts: [],
+        categories: []
+    };
+
+    // 🔥 Fungsi untuk load data dari Firebase
+    function loadBlogData() {
+        database.ref('blogData').once('value')
+            .then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    blogData = data;
+                } else {
+                    // Data default jika pertama kali
+                    blogData = {
+                        posts: [
+                            {
+                                id: 1,
+                                title: "Selamat Datang di Blog Anda!",
+                                content: "Ini adalah postingan pertama Anda. Edit atau hapus postingan ini melalui admin panel, lalu mulai menulis konten Anda sendiri!",
+                                category: "Umum",
+                                tags: ["selamat-datang", "blog"],
+                                date: getCurrentDate(),
+                                excerpt: "Postingan pertama di blog Anda. Mulailah menulis konten menarik!"
+                            }
+                        ],
+                        categories: ["Umum", "Pemrograman", "Teknologi"]
+                    };
+                    saveBlogData(); // Simpan data default
+                }
+                displayAllData();
+            })
+            .catch((error) => {
+                console.error("Error loading data:", error);
+                alert("Error loading data. Check console for details.");
+            });
+    }
+
+    // 🔥 Fungsi untuk save data ke Firebase
+    function saveBlogData() {
+        database.ref('blogData').set(blogData)
+            .then(() => {
+                console.log("Data saved successfully!");
+            })
+            .catch((error) => {
+                console.error("Error saving data:", error);
+                alert("Error saving data. Check console for details.");
+            });
+    }
+
+    // Helper function untuk tanggal
+    function getCurrentDate() {
+        const currentDate = new Date();
+        const months = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        return `${currentDate.getDate()} ${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    }
+
+    // Function to display posts
+    function displayPosts() {
+        const postsContainer = document.getElementById('posts-container');
+        postsContainer.innerHTML = '';
+        
+        if (blogData.posts.length === 0) {
+            postsContainer.innerHTML = '<div class="post"><p>Belum ada postingan. Tambahkan postingan pertama Anda melalui admin panel!</p></div>';
+            return;
+        }
+        
+        blogData.posts.forEach(post => {
+            const postElement = document.createElement('div');
+            postElement.className = 'post';
+            postElement.innerHTML = `
+                <h2 class="post-title">${post.title}</h2>
+                <div class="post-meta">
+                    <i class="far fa-calendar"></i> ${post.date} | 
+                    <i class="far fa-folder"></i> ${post.category} |
+                    <i class="far fa-tags"></i> ${post.tags ? post.tags.join(', ') : ''}
+                </div>
+                <div class="post-content">
+                    <p>${post.excerpt}</p>
+                </div>
+                <a href="#" class="read-more">Baca Selengkapnya</a>
+            `;
+            postsContainer.appendChild(postElement);
+        });
+    }
+
+    // Function to display categories
+    function displayCategories() {
+        const categoriesContainer = document.getElementById('categories-container');
+        categoriesContainer.innerHTML = '';
+        
+        blogData.categories.forEach(category => {
+            const categoryElement = document.createElement('li');
+            categoryElement.innerHTML = `<a href="#"><i class="fas fa-angle-right"></i> ${category}</a>`;
+            categoriesContainer.appendChild(categoryElement);
+        });
+    }
+
+    // Function to display recent posts
+    function displayRecentPosts() {
+        const recentPostsContainer = document.getElementById('recent-posts-container');
+        recentPostsContainer.innerHTML = '';
+        
+        // Show only the 5 most recent posts
+        const recentPosts = blogData.posts.slice(0, 5);
+        
+        recentPosts.forEach(post => {
+            const postElement = document.createElement('li');
+            postElement.innerHTML = `<a href="#">${post.title}</a>`;
+            recentPostsContainer.appendChild(postElement);
+        });
+    }
+
+    // Function to display posts in admin panel
+    function displayAdminPosts() {
+        const adminPostsContainer = document.getElementById('admin-posts-container');
+        adminPostsContainer.innerHTML = '';
+        
+        if (blogData.posts.length === 0) {
+            adminPostsContainer.innerHTML = '<p>Belum ada postingan.</p>';
+            return;
+        }
+        
+        blogData.posts.forEach(post => {
+            const postElement = document.createElement('div');
+            postElement.className = 'post-item';
+            postElement.innerHTML = `
+                <div>
+                    <h4>${post.title}</h4>
+                    <small>${post.date} - ${post.category}</small>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn edit-btn" data-id="${post.id}"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete-btn" data-id="${post.id}"><i class="fas fa-trash"></i></button>
+                </div>
+            `;
+            adminPostsContainer.appendChild(postElement);
+        });
+        
+        // Add event listeners for edit and delete buttons
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const postId = parseInt(this.getAttribute('data-id'));
+                editPost(postId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const postId = parseInt(this.getAttribute('data-id'));
+                deletePost(postId);
+            });
+        });
+    }
+
+    // Function to display all data
+    function displayAllData() {
+        displayPosts();
+        displayCategories();
+        displayRecentPosts();
+        displayAdminPosts();
+    }
+
+    // Function to add a new post
+    function addPost(event) {
+        event.preventDefault();
+        
+        const title = document.getElementById('post-title').value;
+        const content = document.getElementById('post-content').value;
+        const category = document.getElementById('post-category').value;
+        const tags = document.getElementById('post-tags').value.split(',').map(tag => tag.trim());
+        
+        // Validasi input
+        if (!title || !content || !category) {
+            alert('Harap isi semua field yang wajib!');
+            return;
+        }
+        
+        // Create excerpt from content (first 150 characters)
+        const excerpt = content.substring(0, 150) + (content.length > 150 ? '...' : '');
+        
+        // Create new post
+        const newPost = {
+            id: blogData.posts.length > 0 ? Math.max(...blogData.posts.map(p => p.id)) + 1 : 1,
+            title,
+            content,
+            category,
+            tags: tags.filter(tag => tag !== ''), // Remove empty tags
+            date: getCurrentDate(),
+            excerpt
+        };
+        
+        // Add to posts array
+        blogData.posts.unshift(newPost);
+        
+        // Add category if it doesn't exist
+        if (!blogData.categories.includes(category)) {
+            blogData.categories.push(category);
+        }
+        
+        // Save to Firebase
+        saveBlogData();
+        
+        // Update display
+        displayAllData();
+        
+        // Reset form
+        document.getElementById('post-form').reset();
+        
+        // Show success message
+        alert('Postingan berhasil ditambahkan!');
+    }
+
+    // Function to edit a post
+    function editPost(postId) {
+        const post = blogData.posts.find(p => p.id === postId);
+        if (post) {
+            document.getElementById('post-title').value = post.title;
+            document.getElementById('post-content').value = post.content;
+            document.getElementById('post-category').value = post.category;
+            document.getElementById('post-tags').value = post.tags ? post.tags.join(', ') : '';
+            
+            // Change form button to update
+            const form = document.getElementById('post-form');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Postingan';
+            submitBtn.onclick = function(e) {
+                e.preventDefault();
+                updatePost(postId);
+            };
+            
+            // Scroll to form
+            document.getElementById('post-title').scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // Function to update a post
+    function updatePost(postId) {
+        const title = document.getElementById('post-title').value;
+        const content = document.getElementById('post-content').value;
+        const category = document.getElementById('post-category').value;
+        const tags = document.getElementById('post-tags').value.split(',').map(tag => tag.trim());
+        
+        // Validasi input
+        if (!title || !content || !category) {
+            alert('Harap isi semua field yang wajib!');
+            return;
+        }
+        
+        // Create excerpt from content (first 150 characters)
+        const excerpt = content.substring(0, 150) + (content.length > 150 ? '...' : '');
+        
+        // Find and update post
+        const postIndex = blogData.posts.findIndex(p => p.id === postId);
+        if (postIndex !== -1) {
+            blogData.posts[postIndex].title = title;
+            blogData.posts[postIndex].content = content;
+            blogData.posts[postIndex].category = category;
+            blogData.posts[postIndex].tags = tags.filter(tag => tag !== '');
+            blogData.posts[postIndex].excerpt = excerpt;
+            
+            // Add category if it doesn't exist
+            if (!blogData.categories.includes(category)) {
+                blogData.categories.push(category);
+            }
+            
+            // Save to Firebase
+            saveBlogData();
+            
+            // Update display
+            displayAllData();
+            
+            // Reset form and button
+            document.getElementById('post-form').reset();
+            const submitBtn = document.querySelector('#post-form button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-plus"></i> Tambah Postingan';
+            submitBtn.onclick = addPost;
+            
+            // Show success message
+            alert('Postingan berhasil diupdate!');
+        }
+    }
+
+    // Function to delete a post
+    function deletePost(postId) {
+        if (confirm('Apakah Anda yakin ingin menghapus postingan ini?')) {
+            blogData.posts = blogData.posts.filter(p => p.id !== postId);
+            
+            // Save to Firebase
+            saveBlogData();
+            
+            // Update display
+            displayAllData();
+            
+            // Show success message
+            alert('Postingan berhasil dihapus!');
+        }
+    }
+
+    // Initialize the blog
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load data from Firebase
+        loadBlogData();
+        
+        // Add event listener for form submission
+        document.getElementById('post-form').addEventListener('submit', addPost);
+        
+        // Admin panel toggle
+        document.getElementById('admin-toggle').addEventListener('click', function() {
+            document.getElementById('admin-modal').style.display = 'flex';
+        });
+        
+        document.getElementById('close-admin').addEventListener('click', function() {
+            document.getElementById('admin-modal').style.display = 'none';
+        });
+        
+        // Close admin modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const adminModal = document.getElementById('admin-modal');
+            if (event.target === adminModal) {
+                adminModal.style.display = 'none';
+                
+                // Reset form when closing modal
+                document.getElementById('post-form').reset();
+                const submitBtn = document.querySelector('#post-form button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-plus"></i> Tambah Postingan';
+                submitBtn.onclick = addPost;
+            }
+        });
+    });
+</script>
+</body>
+</html>
