@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Cerpen - Secret Terminal</title>
+    <style>
+        /* Terminal Container (Hidden Initially) */
+        #secret-terminal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 90%;
+            max-width: 800px;
+            height: 500px;
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            z-index: 1000;
+            font-family: 'Courier New', monospace;
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        #secret-terminal.active {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Terminal Header */
+        .terminal-header {
+            background: #2d2d2d;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #00ff00;
+        }
+
+        .terminal-title {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close-btn { background: #ff5f57; }
+        .min-btn { background: #ffbd2e; }
+        .max-btn { background: #28ca42; }
+
+        /* Terminal Body */
+        .terminal-body {
+            padding: 20px;
+            height: calc(100% - 120px);
+            overflow-y: auto;
+            color: #00ff00;
+        }
+
+        .terminal-output {
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .command-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .prompt {
+            color: #00ff00;
+            margin-right: 10px;
+        }
+
+        #command-input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+            flex: 1;
+        }
+
+        /* Terminal Footer */
+        .terminal-footer {
+            background: #2d2d2d;
+            padding: 10px;
+            border-top: 1px solid #00ff00;
+            color: #888;
+            font-size: 12px;
+        }
+
+        /* Easter Egg Trigger */
+        .easter-egg-trigger {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a1a1a;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .easter-egg-trigger:hover {
+            opacity: 1;
+        }
+
+        /* Backdrop */
+        .terminal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            display: none;
+        }
+
+        .terminal-backdrop.active {
+            display: block;
+        }
+
+        /* Neofetch ASCII Art */
+        .neofetch-ascii {
+            font-size: 8px;
+            line-height: 1;
+            color: #1793d1;
+            white-space: pre;
+            margin: 10px 0;
+        }
+
+        /* Typing Animation */
+        .typing {
+            border-right: 2px solid #00ff00;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff00; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        /* Matrix Rain Effect */
+        .matrix-rain {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Easter Egg Trigger -->
+    <div class="easter-egg-trigger" onclick="openTerminal()">
+        🖥️ SECRET
+    </div>
+
+    <!-- Terminal Backdrop -->
+    <div class="terminal-backdrop" id="terminalBackdrop" onclick="closeTerminal()"></div>
+
+    <!-- Terminal Window -->
+    <div id="secret-terminal">
+        <div class="terminal-header">
+            <div class="terminal-title">root@cerpen-website:~</div>
+            <div class="terminal-controls">
+                <div class="terminal-btn min-btn" onclick="minimizeTerminal()"></div>
+                <div class="terminal-btn max-btn" onclick="maximizeTerminal()"></div>
+                <div class="terminal-btn close-btn" onclick="closeTerminal()"></div>
+            </div>
+        </div>
+
+        <div class="terminal-body" id="terminalBody">
+            <div class="terminal-output">
+                <div class="neofetch-ascii" id="neofetchAscii"></div>
+                <div class="terminal-output">Welcome to Cerpen Website Secret Terminal! 🚀</div>
+                <div class="terminal-output">Type 'help' to see available commands</div>
+            </div>
+
+            <div class="command-line">
+                <span class="prompt">visitor@cerpen-website:~$</span>
+                <input type="text" id="command-input" autocomplete="off" autofocus>
+            </div>
+        </div>
+
+        <div class="terminal-footer">
+            Press ESC to close • Commands: help, about, stories, secret, matrix, clear
+        </div>
+    </div>
+
+    <!-- Matrix Rain Canvas -->
+    <canvas class="matrix-rain" id="matrixRain"></canvas>
+
+    <script>
+        // Terminal ASCII Art
+        const neofetchArt = `
+                                                                                                  
+                                                                                          
+BBBBBBBBBBBBBBBBB                                                                         
+B::::::::::::::::B                                                                        
+B::::::BBBBBB:::::B                                                                       
+BB:::::B     B:::::B                                                                      
+  B::::B     B:::::B  aaaaaaaaaaaaa     ggggggggg   ggggg aaaaaaaaaaaaa      ssssssssss   
+  B::::B     B:::::B  a::::::::::::a   g:::::::::ggg::::g a::::::::::::a   ss::::::::::s  
+  B::::BBBBBB:::::B   aaaaaaaaa:::::a g:::::::::::::::::g aaaaaaaaa:::::ass:::::::::::::s 
+  B:::::::::::::BB             a::::ag::::::ggggg::::::gg          a::::as::::::ssss:::::s
+  B::::BBBBBB:::::B     aaaaaaa:::::ag:::::g     g:::::g    aaaaaaa:::::a s:::::s  ssssss 
+  B::::B     B:::::B  aa::::::::::::ag:::::g     g:::::g  aa::::::::::::a   s::::::s      
+  B::::B     B:::::B a::::aaaa::::::ag:::::g     g:::::g a::::aaaa::::::a      s::::::s   
+  B::::B     B:::::Ba::::a    a:::::ag::::::g    g:::::ga::::a    a:::::assssss   s:::::s 
+BB:::::BBBBBB::::::Ba::::a    a:::::ag:::::::ggggg:::::ga::::a    a:::::as:::::ssss::::::s
+B:::::::::::::::::B a:::::aaaa::::::a g::::::::::::::::ga:::::aaaa::::::as::::::::::::::s 
+B::::::::::::::::B   a::::::::::aa:::a gg::::::::::::::g a::::::::::aa:::as:::::::::::ss  
+BBBBBBBBBBBBBBBBB     aaaaaaaaaa  aaaa   gggggggg::::::g  aaaaaaaaaa  aaaa sssssssssss    
+                                                 g:::::g                                  
+                                     gggggg      g:::::g                                  
+                                     g:::::gg   gg:::::g                                  
+                                      g::::::ggg:::::::g                                  
+                                       gg:::::::::::::g                                   
+                                         ggg::::::ggg                                     
+                                            gggggg                                        
+                                                                                          
+                                                                                          
+KKKKKKKKK    KKKKKKK                                                                      
+K:::::::K    K:::::K                                                                      
+K:::::::K    K:::::K                                                                      
+K:::::::K   K::::::K                                                                      
+KK::::::K  K:::::KKK   ooooooooooo   rrrrr   rrrrrrrrr      ooooooooooo                   
+  K:::::K K:::::K    oo:::::::::::oo r::::rrr:::::::::r   oo:::::::::::oo                 
+  K::::::K:::::K    o:::::::::::::::or:::::::::::::::::r o:::::::::::::::o                
+  K:::::::::::K     o:::::ooooo:::::orr::::::rrrrr::::::ro:::::ooooo:::::o                
+  K:::::::::::K     o::::o     o::::o r:::::r     r:::::ro::::o     o::::o                
+  K::::::K:::::K    o::::o     o::::o r:::::r     rrrrrrro::::o     o::::o                
+  K:::::K K:::::K   o::::o     o::::o r:::::r            o::::o     o::::o                
+KK::::::K  K:::::KKKo::::o     o::::o r:::::r            o::::o     o::::o                
+K:::::::K   K::::::Ko:::::ooooo:::::o r:::::r            o:::::ooooo:::::o                
+K:::::::K    K:::::Ko:::::::::::::::o r:::::r            o:::::::::::::::o                
+K:::::::K    K:::::K oo:::::::::::oo  r:::::r             oo:::::::::::oo                 
+KKKKKKKKK    KKKKKKK   ooooooooooo    rrrrrrr               ooooooooooo                   
+                                                                                          
+                                                                                          
+                                                                                          
+                                                                                          
+                                                                                          
+                                                                                          
+                                                                                          
+        `;
+
+        // Command Definitions
+        const commands = {
+            help: {
+                execute: () => `Available commands:
+• help     - Show this help message
+• about    - About this website
+• stories  - List available stories
+• secret   - Show secret message
+• matrix   - Enable matrix effect
+• clear    - Clear terminal
+• date     - Show current date
+• neofetch - Show system info
+• echo [text] - Echo text back`,
+                description: "Show available commands"
+            },
+            
+            about: {
+                execute: () => `Cerpen Website Terminal v1.0
+                
+This is a secret terminal easter egg for the Cerpen Website.
+Built with HTML, CSS, and JavaScript.
+
+Features:
+• Real-time command execution
+• Neofetch-style system info
+• Matrix rain effect
+• Interactive storytelling
+
+Made with ❤️ for curious visitors!`,
+                description: "About this terminal"
+            },
+            
+            stories: {
+                execute: () => `Available Stories:
+                
+1. "Senja di Tepi Danau" - Romance
+2. "Surat dari Masa Lalu" - Mystery  
+3. "Pelukan Terakhir" - Drama
+4. "Bintang Kejora" - Fantasy
+5. "Cafe di Sudut Kota" - Slice of Life
+
+Type the story number to read (coming soon!)`,
+                description: "List available stories"
+            },
+            
+            secret: {
+                execute: () => {
+                    const secrets = [
+                        "🤫 You found the secret terminal!",
+                        "🎮 This is actually a fun easter egg!",
+                        "💡 Did you know? The creator spent 2 days making this!",
+                        "🚀 You're among the 1% who find this!",
+                        "🎯 Pro tip: Try the 'matrix' command!",
+                        "📚 The first story was written in 2024!",
+                        "🌟 There are hidden features everywhere!"
+                    ];
+                    return secrets[Math.floor(Math.random() * secrets.length)];
+                },
+                description: "Show random secret message"
+            },
+            
+            matrix: {
+                execute: () => {
+                    toggleMatrixEffect();
+                    return "Matrix rain effect toggled!";
+                },
+                description: "Toggle matrix rain effect"
+            },
+            
+            clear: {
+                execute: () => {
+                    clearTerminal();
+                    return "";
+                },
+                description: "Clear terminal screen"
+            },
+            
+            date: {
+                execute: () => `Current date: ${new Date().toLocaleString()}`,
+                description: "Show current date and time"
+            },
+            
+            neofetch: {
+                execute: () => {
+                    const stats = {
+                        "Website": "Cerpen Collection",
+                        "OS": "GitHub Pages",
+                        "Kernel": "JavaScript 6.0",
+                        "Uptime": `${Math.floor(Math.random() * 100)} days`,
+                        "Shell": "Secret Terminal 1.0",
+                        "CPU": "Visitor's Brain",
+                        "Memory": `${Math.floor(Math.random() * 100)}%`,
+                        "Stories": "15+"
+                    };
+                    
+                    let output = "";
+                    Object.entries(stats).forEach(([key, value]) => {
+                        output += `<div style="display: flex; justify-content: space-between; width: 300px;">
+                            <span style="color: #00ffff;">${key}:</span>
+                            <span>${value}</span>
+                        </div>`;
+                    });
+                    
+                    return output;
+                },
+                description: "Show system information"
+            },
+            
+            echo: {
+                execute: (args) => args.join(" "),
+                description: "Echo text back"
+            }
+        };
+
+        // Terminal Functions
+        function openTerminal() {
+            document.getElementById('secret-terminal').classList.add('active');
+            document.getElementById('terminalBackdrop').classList.add('active');
+            document.getElementById('command-input').focus();
+            document.getElementById('neofetchAscii').textContent = neofetchArt;
+        }
+
+        function closeTerminal() {
+            document.getElementById('secret-terminal').classList.remove('active');
+            document.getElementById('terminalBackdrop').classList.remove('active');
+        }
+
+        function minimizeTerminal() {
+            // Add minimize functionality if needed
+            appendOutput("Minimize feature coming soon!");
+        }
+
+        function maximizeTerminal() {
+            // Add maximize functionality if needed  
+            appendOutput("Maximize feature coming soon!");
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminalBody').innerHTML = `
+                <div class="command-line">
+                    <span class="prompt">visitor@cerpen-website:~$</span>
+                    <input type="text" id="command-input" autocomplete="off" autofocus>
+                </div>
+            `;
+            document.getElementById('command-input').focus();
+        }
+
+        function appendOutput(message) {
+            const outputDiv = document.createElement('div');
+            outputDiv.className = 'terminal-output';
+            outputDiv.innerHTML = message;
+            document.getElementById('terminalBody').appendChild(outputDiv);
+        }
+
+        function executeCommand(input) {
+            const [command, ...args] = input.trim().split(' ');
+            const cmd = commands[command.toLowerCase()];
+            
+            if (cmd) {
+                const result = cmd.execute(args);
+                if (result) appendOutput(result);
+            } else if (input.trim() !== '') {
+                appendOutput(`Command not found: ${command}. Type 'help' for available commands.`);
+            }
+        }
+
+        // Matrix Rain Effect
+        function toggleMatrixEffect() {
+            const canvas = document.getElementById('matrixRain');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = "01010101010101010101";
+            const charArray = chars.split("");
+            const rainDrops = [];
+            
+            const font_size = 10;
+            const columns = canvas.width / font_size;
+            
+            for(let x = 0; x < columns; x++) {
+                rainDrops[x] = 1;
+            }
+            
+            function drawMatrix() {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = "#0F0";
+                ctx.font = font_size + "px arial";
+                
+                for(let i = 0; i < rainDrops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * font_size, rainDrops[i] * font_size);
+                    
+                    if(rainDrops[i] * font_size > canvas.height && Math.random() > 0.975) {
+                        rainDrops[i] = 0;
+                    }
+                    rainDrops[i]++;
+                }
+            }
+            
+            if (!window.matrixInterval) {
+                window.matrixInterval = setInterval(drawMatrix, 30);
+                appendOutput("Matrix rain activated! Type 'matrix' again to disable.");
+            } else {
+                clearInterval(window.matrixInterval);
+                window.matrixInterval = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                appendOutput("Matrix rain disabled.");
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('command-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value;
+                appendOutput(`<span class="prompt">visitor@cerpen-website:~$</span> ${command}`);
+                executeCommand(command);
+                this.value = '';
+                
+                // Scroll to bottom
+                const terminalBody = document.getElementById('terminalBody');
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeTerminal();
+            }
+            
+            // Secret key combination: Ctrl+Alt+T
+            if (e.ctrlKey && e.altKey && e.key === 't') {
+                e.preventDefault();
+                openTerminal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Secret terminal loaded! Press Ctrl+Alt+T to open.");
+        });
+    </script>
+</body>
+</html>
+
